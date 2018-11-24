@@ -14,6 +14,7 @@ public class MessageBusImpl implements MessageBus {
 	
 	private static MessageBusImpl instance = null;
 	private Vector<Object[]> microServicesQueue;
+	private Vector<Integer> roundRobinTracker;
 	
 	private MessageBusImpl() {
 		microServicesQueue = new Vector<Object[]>();
@@ -51,8 +52,10 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		// TODO Auto-generated method stub
-
+		for(Object[] arr: microServicesQueue) {
+			if(arr[3] == b.getClass());
+				
+		}
 	}
 
 	
@@ -65,7 +68,7 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void register(MicroService m) {
 		Queue<Message> q = new LinkedList<>();
-		Object[] arr = new Object[4];
+		Object[] arr = new Object[4];//arr[0] holds the queue, arr[1] holds the micro-service, arr[2] holds the event type, arr[3] holds the broadcast type.
 		arr[0] = q;
 		arr[1] = m;
 		microServicesQueue.add(arr);
@@ -73,7 +76,10 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void unregister(MicroService m) {
-		// TODO Auto-generated method stub
+		for(Object[] arr: microServicesQueue) {
+			if(arr[1] == m)
+				microServicesQueue.remove(arr);
+		}
 
 	}
 
