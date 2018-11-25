@@ -1,8 +1,13 @@
 package bgu.spl.mics;
 
 import java.util.Vector;
+
+import bgu.spl.mics.application.services.*;
+
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -14,24 +19,32 @@ public class MessageBusImpl implements MessageBus {
 	
 	private static MessageBusImpl instance = null;
 	private Vector<Object[]> microServicesQueue;
-	private Vector<Integer> roundRobinTracker;
+	private Map<Class<? extends MicroService>, Queue<MicroService>> roundRobinMap;
 	
 	private MessageBusImpl() {
 		microServicesQueue = new Vector<Object[]>();
+		roundRobinMap = new HashMap();
+		roundRobinMap.put(APIService.class, new LinkedList<>());
+		roundRobinMap.put(InventoryService.class, new LinkedList<>());
+		roundRobinMap.put(LogisticsService.class, new LinkedList<>());
+		roundRobinMap.put(ResourceService.class, new LinkedList<>());
+		roundRobinMap.put(SellingService.class, new LinkedList<>());
+		roundRobinMap.put(TimeService.class, new LinkedList<>());
 	}
 	
 	public static MessageBusImpl getInstance() {
 		if (instance == null) 
 			instance = new MessageBusImpl();
 		return instance;
-	
 	}
 	
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
 		for(Object[] arr: microServicesQueue) {
-			if(arr[1] == m)
+			if(arr[1] == m && arr [2] != type) {
 				arr[2] = type;
+				roundRobinMap.get(m.getClass()).add(m);
+			}
 		}
 	}
 
@@ -61,8 +74,10 @@ public class MessageBusImpl implements MessageBus {
 	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		// TODO Auto-generated method stub
-		return null;
+		MicroService m = roundRobinMap.get(e.getMS()).remove();
+		for(Object[] arr: microServicesQueue) {
+			if(arr[1] == m) ((Queue<Message>)arr[0]).add(e);
+		}
 	}
 
 	@Override
