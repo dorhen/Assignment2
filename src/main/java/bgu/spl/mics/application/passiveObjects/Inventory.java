@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
-
+import java.util.*;
+import java.io.*;
 
 
 /**
@@ -13,13 +14,21 @@ package bgu.spl.mics.application.passiveObjects;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Inventory {
+	
+	private static Inventory instance = null;
+	private Vector<BookInventoryInfo> inv;
+	private Inventory() {
+		inv = new Vector<BookInventoryInfo>();
+	}
 
 	/**
      * Retrieves the single instance of this class.
      */
+	
 	public static Inventory getInstance() {
-		//TODO: Implement this
-		return null;
+		if(instance == null)
+			instance = new Inventory();
+		return instance;
 	}
 	
 	/**
@@ -30,7 +39,8 @@ public class Inventory {
      * 						of the inventory.
      */
 	public void load (BookInventoryInfo[ ] inventory ) {
-		
+		for(BookInventoryInfo book: inventory)
+			inv.add(book);
 	}
 	
 	/**
@@ -42,10 +52,14 @@ public class Inventory {
      * 			second should reduce by one the number of books of the desired type.
      */
 	public OrderResult take (String book) {
-		
-		return null;
+		for(BookInventoryInfo bookInfo : this.inv) 
+			if(bookInfo.getBookTitle().equals(book) && bookInfo.getAmountInInventory() > 0) {
+				bookInfo.reduceAmount();
+				return OrderResult.SUCCESSFULLY_TAKEN;
+			}
+		return OrderResult.NOT_IN_STOCK;
 	}
-	
+		
 	
 	
 	/**
@@ -55,7 +69,9 @@ public class Inventory {
      * @return the price of the book if it is available, -1 otherwise.
      */
 	public int checkAvailabiltyAndGetPrice(String book) {
-		//TODO: Implement this
+		for(BookInventoryInfo bookInfo : this.inv) {
+			if(bookInfo.getBookTitle().equals(book))return bookInfo.getAmountInInventory();
+		}
 		return -1;
 	}
 	
@@ -68,6 +84,20 @@ public class Inventory {
      * This method is called by the main method in order to generate the output.
      */
 	public void printInventoryToFile(String filename){
-		//TODO: Implement this
+		HashMap<String, Integer> hashmap = new HashMap<String, Integer>();
+		for(BookInventoryInfo book : this.inv) {
+			hashmap.put(book.getBookTitle(), book.getAmountInInventory());
+		}
+	    try
+	    {
+	    	FileOutputStream fos = new FileOutputStream(filename+".ser");
+	    	ObjectOutputStream oos = new ObjectOutputStream(fos);
+	    	oos.writeObject(hashmap);
+	    	oos.close();
+	    	fos.close();
+	    	
+	    }catch(IOException ioe) {
+	    	ioe.printStackTrace();
+	    }
 	}
 }
