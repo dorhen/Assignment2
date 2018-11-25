@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import java.util.concurrent.TimeUnit;
 
 import bgu.spl.mics.example.messages.ExampleResult;
 
@@ -25,7 +26,7 @@ public class FutureTest {
 
 	@Test
 	public void testFuture() {
-		asserNull(ft);
+		assertNull(ft);
 	}
 
 	@Test
@@ -49,7 +50,7 @@ public class FutureTest {
 
 	@Test
 	public void testGetLongTimeUnit() {
-		ft.get(5,seconds);
+		ft.get(5,TimeUnit.SECONDS);
 	}
 
 }
