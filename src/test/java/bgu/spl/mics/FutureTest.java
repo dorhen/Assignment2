@@ -49,7 +49,7 @@ public class FutureTest {
 
 	@Test
 	public void testGetLongTimeUnit() {
-		fail("Not yet implemented");
+		ft.get(5,seconds);
 	}
 
 }
