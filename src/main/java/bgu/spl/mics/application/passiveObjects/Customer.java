@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public class Customer {
 		this.id=id;
 		this.name=name;
 		this.address=address;
-		List=new List<OrderRecipt>();
+		List=new LinkedList<OrderReceipt>();
 		this.distance=distance;
 		this.creditCard=credit;
 		availableAmountInCreditCard=credit;
@@ -62,10 +63,7 @@ public class Customer {
      * @return A list of receipts.
      */
 	public List<OrderReceipt> getCustomerReceiptList() {
-		List<OrderRecipt> toSend = new List<OrderRecipt>();
-		for(OrderRecipt r: List)
-			toSend.add(r);
-		return toSend;
+		return List;
 	}
 	
 	/**
