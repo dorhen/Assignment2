@@ -9,37 +9,50 @@ import java.util.List;
  * You may add fields and methods to this class as you see fit (including public methods).
  */
 public class Customer {
-
+	private int id;
+	private String name;
+	private String address;
+	private List<OrderReceipt> List;
+	private int distance;
+	private int creditCard;
+	private int availableAmountInCreditCard;
+	
+	public Customer(int id, String name, String address, int distance, int creditCard, int credit){
+		this.id=id;
+		this.name=name;
+		this.address=address;
+		List=new List<OrderRecipt>();
+		this.distance=distance;
+		this.creditCard=credit;
+		availableAmountInCreditCard=credit;
+	}
+	
 	/**
      * Retrieves the name of the customer.
      */
 	public String getName() {
-		// TODO Implement this
-		return null;
+		return name;
 	}
 
 	/**
      * Retrieves the ID of the customer  . 
      */
 	public int getId() {
-		// TODO Implement this
-		return 0;
+		return id;
 	}
 	
 	/**
      * Retrieves the address of the customer.  
      */
 	public String getAddress() {
-		// TODO Implement this
-		return null;
+		return address;
 	}
 	
 	/**
      * Retrieves the distance of the customer from the store.  
      */
 	public int getDistance() {
-		// TODO Implement this
-		return 0;
+		return distance;
 	}
 
 	
@@ -49,8 +62,10 @@ public class Customer {
      * @return A list of receipts.
      */
 	public List<OrderReceipt> getCustomerReceiptList() {
-		// TODO Implement this
-		return null;
+		List<OrderRecipt> toSend = new List<OrderRecipt>();
+		for(OrderRecipt r: List)
+			toSend.add(r);
+		return toSend;
 	}
 	
 	/**
@@ -59,16 +74,31 @@ public class Customer {
      * @return Amount of money left.   
      */
 	public int getAvailableCreditAmount() {
-		// TODO Implement this
-		return 0;
+		return availableAmountInCreditCard;
 	}
 	
 	/**
      * Retrieves this customers credit card serial number.    
      */
 	public int getCreditNumber() {
-		// TODO Implement this
-		return 0;
+		return creditCard;
+	}
+	
+	/**
+	* charge the customer credit card if possible
+	*/
+	public boolean charge(int amount){
+		if(amount>availableAmountInCreditCard)
+			return false;
+		availableAmountInCreditCard -= amount;
+		return true;
+	}
+	
+	/**
+	* add receipt to the list
+	*/
+	public void addReceipt(OrderReceipt r){
+		List.add(r);
 	}
 	
 }
