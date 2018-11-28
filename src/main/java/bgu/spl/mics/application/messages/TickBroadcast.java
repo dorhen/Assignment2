@@ -6,8 +6,8 @@ public class TickBroadcast implements Broadcast {
 	
 	private int currentTick;
 	
-	public TickBroadcast() {
-		currentTick = 0;
+	public TickBroadcast(int time) {
+		currentTick = time;
 	}
 	
 	public int getCurrentTime() {
