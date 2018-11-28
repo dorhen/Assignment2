@@ -16,6 +16,7 @@ import java.util.List;
 public class ResourcesHolder {
 	private static ResourcesHolder instance;
 	private DeliveryVehicle[] vehicles;
+	private boolean[] ready;
 	
 	private ResourcesHolder() {
 		vehicles = new DeliveryVehicle[0];
@@ -60,6 +61,9 @@ public class ResourcesHolder {
 	public void load(DeliveryVehicle[] vehicles) {
 		sort(vehicles);
 		this.vehicles = vehicles;
+		ready = new boolean[vehicles.length];
+		for(int i=0;i<ready.length;i++)
+			ready[i]=false;
 		
 	}
 
