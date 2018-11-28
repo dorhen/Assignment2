@@ -17,9 +17,11 @@ public class ResourcesHolder {
 	private static ResourcesHolder instance;
 	private DeliveryVehicle[] vehicles;
 	private boolean[] ready;
+	private Queue<Future<DeliveryVehicle>> toBeResolved; 
 	
 	private ResourcesHolder() {
 		vehicles = new DeliveryVehicle[0];
+		toBeResolved = new LinkedList<Future<DeliveryVehicle>>();
 	}
 	
 	/**
@@ -38,9 +40,10 @@ public class ResourcesHolder {
      * @return 	{@link Future<DeliveryVehicle>} object which will resolve to a 
      * 			{@link DeliveryVehicle} when completed.   
      */
-	public Future<DeliveryVehicle> acquireVehicle() {
-		//TODO: Implement this
-		return null;
+	public Future<DeliveryVehicle> acquireVehicle() {// probably not right. not sure how future will be resolved
+		Future<DeliveryVehicle> ans = new Future<>();
+		toBeResolved.add(ans);
+		return ans;
 	}
 	
 	/**
@@ -50,8 +53,13 @@ public class ResourcesHolder {
      * @param vehicle	{@link DeliveryVehicle} to be released.
      */
 	public void releaseVehicle(DeliveryVehicle vehicle) {
-		
-	}
+		for(int i=0; i<vehicles.length ; i++){
+                    if(vehicles[i]==vehicle){
+                            ready[i]=true;
+                            return;
+                    }
+                }
+        }            
 	
 	/**
      * Receives a collection of vehicles and stores them.
@@ -64,7 +72,6 @@ public class ResourcesHolder {
 		ready = new boolean[vehicles.length];
 		for(int i=0;i<ready.length;i++)
 			ready[i]=false;
-		
 	}
 
 	private void sort(DeliveryVehicle[] arr) {
@@ -79,4 +86,14 @@ public class ResourcesHolder {
 			}
 		}
 	}
-}
+	
+	private void resolve(){
+            while(!toBeResolved.isEmpty()){
+                for(int i=0; i<ready.length;i++){
+                    if(ready[i]){
+                        toBeResolved.remove().resolve(vehicles[i]);
+                        ready[i]=false;
+                    }
+                }
+            }
+        }
