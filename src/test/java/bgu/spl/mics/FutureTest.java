@@ -5,19 +5,16 @@ import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import java.util.concurrent.TimeUnit;
 
 import bgu.spl.mics.example.messages.ExampleResult;
 
 public class FutureTest {
 	
 	private Future<ExampleResult> ft;
-	private ExampleResult result;
 
 	@Before
 	public void setUp() throws Exception {
 		ft = new Future<ExampleResult>();
-		result= new ExampleResult();
 	}
 
 	@After
@@ -26,31 +23,33 @@ public class FutureTest {
 
 	@Test
 	public void testFuture() {
-		assertNull(ft);
+		
 	}
 
 	@Test
 	public void testGet() {
-		ft.resolve(result);
-		assertEquals(result, ft.get());		
+		ExampleResult result = ft.get();
+		assertFalse(result == null);
+		assertTrue(result != null);
+		
 	}
 
 	@Test
 	public void testResolve() {
+		ExampleResult result = new ExampleResult();;
 		ft.resolve(result);
-		assertEquals(result,ft.get());
+		ExampleResult result2 = ft.get();
+		assertEquals(result,result2);
 	}
 
 	@Test
-	public void testIsDone(){
-		assertFalse(ft.isDone());
-		ft.resolve(result);
-		assertTrue(ft.isDone());
+	public void testIsDone() {
+		
 	}
 
 	@Test
 	public void testGetLongTimeUnit() {
-		ft.get(5,TimeUnit.SECONDS);
+		fail("Not yet implemented");
 	}
 
 }

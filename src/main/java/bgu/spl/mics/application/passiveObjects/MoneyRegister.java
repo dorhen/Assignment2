@@ -1,6 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
 
-
+import java.util.List;
+import java.io.*;
+import java.util.LinkedList;
 
 /**
  * Passive object representing the store finance management. 
@@ -13,12 +15,19 @@ package bgu.spl.mics.application.passiveObjects;
  */
 public class MoneyRegister {
 	
+	private static MoneyRegister instance;
+	private List<OrderReceipt> registery;
+	
+	private MoneyRegister() {
+		registery = new LinkedList<>();
+	}
 	/**
      * Retrieves the single instance of this class.
      */
 	public static MoneyRegister getInstance() {
-		//TODO: Implement this
-		return null;
+		if(instance == null)
+			instance = new MoneyRegister();
+		return instance;
 	}
 	
 	/**
@@ -27,15 +36,17 @@ public class MoneyRegister {
      * @param r		The receipt to save in the money register.
      */
 	public void file (OrderReceipt r) {
-		//TODO: Implement this.
+		registery.add(r);
 	}
 	
 	/**
      * Retrieves the current total earnings of the store.  
      */
 	public int getTotalEarnings() {
-		//TODO: Implement this
-		return 0;
+		int totalEarnings = 0;
+		for(OrderReceipt r: registery)
+			totalEarnings += r.getPrice();
+		return totalEarnings;
 	}
 	
 	/**
@@ -43,8 +54,8 @@ public class MoneyRegister {
      * <p>
      * @param amount 	amount to charge
      */
-	public void chargeCreditCard(Customer c, int amount) {
-		// TODO Implement this
+	public void chargeCreditCard(Customer c, int amount) {//sync it?
+		c.charge(amount);
 	}
 	
 	/**
@@ -53,6 +64,16 @@ public class MoneyRegister {
      * This method is called by the main method in order to generate the output.. 
      */
 	public void printOrderReceipts(String filename) {
-		//TODO: Implement this
+		try {
+			FileOutputStream fileOut = new FileOutputStream(filename+".ser");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(registery);
+			out.close();
+			fileOut.close();
+		}
+		catch(IOException ioe) {
+			ioe.printStackTrace();
+		}
+		
 	}
 }

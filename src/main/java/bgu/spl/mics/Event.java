@@ -9,6 +9,4 @@ package bgu.spl.mics;
  */
 public interface Event<T> extends Message {
 	
-
-	public Class<? extends MicroService> getMS();
 }

@@ -1,6 +1,10 @@
 package bgu.spl.mics.application.services;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TickBroadcast;
+
 
 /**
  * APIService is in charge of the connection between a client and the store.
@@ -12,15 +16,26 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class APIService extends MicroService{
+	
+	private static AtomicInteger counter;
+	private Map<>
+	
+	
 
-	public APIService() {
-		super("Change_This_Name");
-		// TODO Implement this
+	public APIService(List) {
+		
+		super("APIService"+counter.getAndIncrement());
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
+		System.out.println("Cutomer service "+ getName() + " has started.");
+		subscribeBroadcast(TickBroadcast.class,current -> {
+			System.out.println("Got a message from the tick broadcast, current time: "+ current.getCurrentTime());
+			if()
+		});
+		
+		
 		
 	}
 

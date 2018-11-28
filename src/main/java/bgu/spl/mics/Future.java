@@ -40,9 +40,7 @@ public class Future<T> {
 	/**
      * Resolves the result of this Future object.
      */
-	public void resolve (T result) {//synchronized
-		if(result== null)
-			return;
+	public synchronized void resolve (T result) {//synchronized
 		this.result=result;
 		notifyAll();
 	}
@@ -50,7 +48,7 @@ public class Future<T> {
 	/**
      * @return true if this object has been resolved, false otherwise
      */
-	public synchronized boolean isDone() {
+	public boolean isDone() {
 		return result!=null;
 	}
 	
@@ -65,7 +63,7 @@ public class Future<T> {
      * 	       wait for {@code timeout} TimeUnits {@code unit}. If time has
      *         elapsed, return null.
      */
-	public synchronized T get(long timeout, TimeUnit unit) {
+	public T get(long timeout, TimeUnit unit) {
 		if(result==null) {
 			try { unit.sleep(timeout);}
 			catch(InterruptedException e) { return result;}
