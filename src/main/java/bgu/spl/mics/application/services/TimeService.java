@@ -1,6 +1,9 @@
 package bgu.spl.mics.application.services;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TickBroadcast;
 
 /**
  * TimeService is the global system timer There is only one instance of this micro-service.
@@ -13,16 +16,36 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class TimeService extends MicroService{
+	
+	private AtomicInteger globalTick;
+	private int sleepLength;
+	private int terminationTick;
+	
 
-	public TimeService() {
-		super("Change_This_Name");
-		// TODO Implement this
+	public TimeService(int length, int lifetime) {
+		super("Time Service");
+		globalTick = new AtomicInteger(1);
+		sleepLength = length;
+		terminationTick = lifetime+1;
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+		System.out.println("TimeService was created, starting to count");
+		TimeUnit unit = TimeUnit.MILLISECONDS;
+		while(globalTick.getAcquire() != terminationTick) {
+			sendBroadcast(new TickBroadcast(globalTick.getAcquire()));
+			System.out.println("tick");
+			try {
+				unit.sleep(sleepLength);
+			}
+			catch(InterruptedException e) {
+				
+			}
+			globalTick.incrementAndGet();
+			
+		}
+		System.out.println("Arrived termination");
+		terminate();
 	}
-
 }
