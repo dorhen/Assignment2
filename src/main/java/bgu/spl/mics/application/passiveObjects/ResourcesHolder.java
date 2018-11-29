@@ -14,10 +14,10 @@ import java.util.Queue;
  * You can add ONLY private methods and fields to this class.
  */
 public class ResourcesHolder {
-	private static ResourcesHolder instance;
+	private static ResourcesHolder instance = new ResourcesHolder();
 	private DeliveryVehicle[] vehicles;
 	private boolean[] ready;
-	private Queue<Future<DeliveryVehicle>> toBeResolved; 
+	private Queue<Future<DeliveryVehicle>> toBeResolved;
 	
 	private ResourcesHolder() {
 		vehicles = new DeliveryVehicle[0];
@@ -28,9 +28,7 @@ public class ResourcesHolder {
      * Retrieves the single instance of this class.
      */
 	public static ResourcesHolder getInstance() {
-		if(instance == null)
-			instance = new ResourcesHolder();
-		return null;
+		return ResourcesHolder.instance;
 	}
 	
 	/**
@@ -40,9 +38,11 @@ public class ResourcesHolder {
      * @return 	{@link Future<DeliveryVehicle>} object which will resolve to a 
      * 			{@link DeliveryVehicle} when completed.   
      */
-	public synchronized Future<DeliveryVehicle> acquireVehicle() {// probably not right. not sure how future will be resolved
+	public Future<DeliveryVehicle> acquireVehicle() {// probably not right. not sure how future will be resolved
 		Future<DeliveryVehicle> ans = new Future<>();
-		toBeResolved.add(ans);
+		synchronized(toBeResolved){
+			toBeResolved.add(ans);
+		}
 		resolve();
 		return ans;
 	}
@@ -55,25 +55,25 @@ public class ResourcesHolder {
      */
 	public void releaseVehicle(DeliveryVehicle vehicle) {
 		for(int i=0; i<vehicles.length ; i++){
-                    if(vehicles[i]==vehicle){
-                            ready[i]=true;
-                            return;
-                    }
-                }
+			if(vehicles[i]==vehicle){
+				ready[i]=true;
+				return;
+				}
+			}
 		resolve();
-        }            
+        }   
 	
 	/**
      * Receives a collection of vehicles and stores them.
      * <p>
      * @param vehicles	Array of {@link DeliveryVehicle} instances to store.
      */
-	public void load(DeliveryVehicle[] vehicles) {
+	public synchronized void load(DeliveryVehicle[] vehicles) {
 		sort(vehicles);
 		this.vehicles = vehicles;
 		ready = new boolean[vehicles.length];
 		for(int i=0;i<ready.length;i++)
-			ready[i]=false;
+			ready[i]=true;
 	}
 
 	private void sort(DeliveryVehicle[] arr) {
@@ -97,6 +97,7 @@ public class ResourcesHolder {
 	                        toBeResolved.remove().resolve(vehicles[i]);
 	                        ready[i]=false;
 	                        notifyAll();
+	                        return;
 	                    }
                 	}
                 }
