@@ -53,11 +53,11 @@ public class Inventory {
      */
 	public OrderResult take (String book) {
 		for(BookInventoryInfo bookInfo : this.inv) 
-			if(bookInfo.getBookTitle().equals(book) && bookInfo.getAmountInInventory() > 0) {
-				synchronized(bookInfo) {
-					bookInfo.reduceAmount();
-					return OrderResult.SUCCESSFULLY_TAKEN;
-				}
+			synchronized(bookInfo) {
+				if(bookInfo.getBookTitle().equals(book) && bookInfo.getAmountInInventory() > 0) {
+				bookInfo.reduceAmount();
+				return OrderResult.SUCCESSFULLY_TAKEN;
+				}	
 			}
 		return OrderResult.NOT_IN_STOCK;
 	}

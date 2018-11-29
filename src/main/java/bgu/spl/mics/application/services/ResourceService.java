@@ -2,7 +2,8 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.carEvent;
+import bgu.spl.mics.application.messages.CarEvent;
+import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.*;
 
 
@@ -25,7 +26,10 @@ public class ResourceService extends MicroService{
 
 	@Override
 	protected void initialize() {
-		subscribeEvent(carEvent.class, cur -> {
+		subscribeBroadcast(TickBroadcast.class, tB -> {
+			if(tB.getTermination())terminate();			
+		});
+		subscribeEvent(CarEvent.class, cur -> {
 			Future<DeliveryVehicle> ft= resources.acquireVehicle();
 			DeliveryVehicle car = ft.get();
 			complete(cur , car);

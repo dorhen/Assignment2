@@ -8,10 +8,10 @@ import bgu.spl.mics.application.services.*;
  */
 public class BookStoreRunner {
     public static void main(String[] args) {
-    	Thread t2 = new Thread(new APIService(null));
-    	Thread t3 = new Thread(new APIService(null));
+    	Thread t2 = new Thread(new APIService(null,null));
+    	Thread t3 = new Thread(new APIService(null,null));
 
-    	Thread t4 = new Thread(new APIService(null));
+    	Thread t4 = new Thread(new APIService(null,null));
 
     	Thread t1 = new Thread(new TimeService(2000, 5));
     	//Thread t3 = new Thread(new APIService(null));

@@ -20,4 +20,3 @@ public class DeliveryEvent implements Event<Boolean>{
 	}
   
 }
-    

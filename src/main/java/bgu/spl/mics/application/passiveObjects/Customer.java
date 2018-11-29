@@ -17,6 +17,7 @@ public class Customer {
 	private int distance;
 	private int creditCard;
 	private int availableAmountInCreditCard;
+	private Object _cLock;
 	
 	public Customer(int id, String name, String address, int distance, int creditCard, int credit){
 		this.id=id;
@@ -26,6 +27,7 @@ public class Customer {
 		this.distance=distance;
 		this.creditCard=credit;
 		availableAmountInCreditCard=credit;
+		_cLock = new Object();
 	}
 	
 	/**
@@ -85,11 +87,11 @@ public class Customer {
 	/**
 	* charge the customer credit card if possible
 	*/
-	public boolean charge(int amount){
-		if(amount>availableAmountInCreditCard)
-			return false;
-		availableAmountInCreditCard -= amount;
-		return true;
+	public synchronized boolean charge(int amount){
+			if(amount>availableAmountInCreditCard)
+				return false;
+			availableAmountInCreditCard -= amount;
+			return true;
 	}
 	
 	/**

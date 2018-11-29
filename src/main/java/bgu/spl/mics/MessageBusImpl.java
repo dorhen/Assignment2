@@ -17,7 +17,7 @@ import java.util.Queue;
  */
 public class MessageBusImpl implements MessageBus {
 	
-	private static MessageBusImpl instance = new MessageBusImpl();
+	private static MessageBusImpl instance = null;
 	private Vector<Object[]> microServicesQueue;
 	private Map<Class<? extends Event<?>>, Queue<MicroService>> roundRobinMap;
 	private Map<Event<?>,Future<?>> futureMap;
@@ -29,7 +29,9 @@ public class MessageBusImpl implements MessageBus {
 	}
 	
 	public static MessageBusImpl getInstance() {
-		return MessageBusImpl.instance;
+		if (instance == null) 
+			instance = new MessageBusImpl();
+		return instance;
 	}
 	
 	@Override
@@ -106,6 +108,8 @@ public class MessageBusImpl implements MessageBus {
 	public void unregister(MicroService m) {
 		for(Object[] arr: microServicesQueue) {
 			if(arr[1] == m) {
+				for(Message e : ((Queue<Message>)arr[0]))
+						complete((Event<?>) e,null);
 				microServicesQueue.remove(arr);
 				for(Class<? extends Event<?>> type : ((Vector<Class<? extends Event<?>>>)arr[2])) {
 					Queue<MicroService> msQ = roundRobinMap.get(type);;
