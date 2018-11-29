@@ -2,7 +2,7 @@ package bgu.spl.mics.application.passiveObjects;
 
 import bgu.spl.mics.Future;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Queue;
 
 /**
  * Passive object representing the resource manager.
@@ -40,9 +40,10 @@ public class ResourcesHolder {
      * @return 	{@link Future<DeliveryVehicle>} object which will resolve to a 
      * 			{@link DeliveryVehicle} when completed.   
      */
-	public Future<DeliveryVehicle> acquireVehicle() {// probably not right. not sure how future will be resolved
+	public synchronized Future<DeliveryVehicle> acquireVehicle() {// probably not right. not sure how future will be resolved
 		Future<DeliveryVehicle> ans = new Future<>();
 		toBeResolved.add(ans);
+		resolve();
 		return ans;
 	}
 	
@@ -59,6 +60,7 @@ public class ResourcesHolder {
                             return;
                     }
                 }
+		resolve();
         }            
 	
 	/**
@@ -88,12 +90,16 @@ public class ResourcesHolder {
 	}
 	
 	private void resolve(){
-            while(!toBeResolved.isEmpty()){
+            if(!toBeResolved.isEmpty()){
                 for(int i=0; i<ready.length;i++){
-                    if(ready[i]){
-                        toBeResolved.remove().resolve(vehicles[i]);
-                        ready[i]=false;
-                    }
+                	synchronized(vehicles[i]) {
+	                    if(ready[i]){
+	                        toBeResolved.remove().resolve(vehicles[i]);
+	                        ready[i]=false;
+	                        notifyAll();
+	                    }
+                	}
                 }
             }
         }
+}
