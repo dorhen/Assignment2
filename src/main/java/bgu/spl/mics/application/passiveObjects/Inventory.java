@@ -15,7 +15,7 @@ import java.io.*;
  */
 public class Inventory {
 	
-	private static Inventory instance = null;
+	private static Inventory instance = new Inventory();
 	private Vector<BookInventoryInfo> inv;
 	private Inventory() {
 		inv = new Vector<BookInventoryInfo>();
@@ -26,8 +26,6 @@ public class Inventory {
      */
 	
 	public static Inventory getInstance() {
-		if(instance == null)
-			instance = new Inventory();
 		return instance;
 	}
 	
@@ -53,11 +51,11 @@ public class Inventory {
      */
 	public OrderResult take (String book) {
 		for(BookInventoryInfo bookInfo : this.inv) 
-			if(bookInfo.getBookTitle().equals(book) && bookInfo.getAmountInInventory() > 0) {
-				synchronized(bookInfo) {
-					bookInfo.reduceAmount();
-					return OrderResult.SUCCESSFULLY_TAKEN;
-				}
+			synchronized(bookInfo) {
+				if(bookInfo.getBookTitle().equals(book) && bookInfo.getAmountInInventory() > 0) {
+				bookInfo.reduceAmount();
+				return OrderResult.SUCCESSFULLY_TAKEN;
+				}	
 			}
 		return OrderResult.NOT_IN_STOCK;
 	}

@@ -15,8 +15,8 @@ public class Customer {
 	private String address;
 	private List<OrderReceipt> List;
 	private int distance;
-	private int creditCard;
-	private int availableAmountInCreditCard;
+	private CreditCard creditCard;
+	public List<orderSchedule> orderSchedule;
 	
 	public Customer(int id, String name, String address, int distance, int creditCard, int credit){
 		this.id=id;
@@ -24,8 +24,7 @@ public class Customer {
 		this.address=address;
 		List=new LinkedList<OrderReceipt>();
 		this.distance=distance;
-		this.creditCard=credit;
-		availableAmountInCreditCard=credit;
+		this.creditCard=new CreditCard(creditCard,credit);
 	}
 	
 	/**
@@ -72,24 +71,24 @@ public class Customer {
      * @return Amount of money left.   
      */
 	public int getAvailableCreditAmount() {
-		return availableAmountInCreditCard;
+		return creditCard.amount;
 	}
 	
 	/**
      * Retrieves this customers credit card serial number.    
      */
 	public int getCreditNumber() {
-		return creditCard;
+		return creditCard.number;
 	}
 	
 	/**
 	* charge the customer credit card if possible
 	*/
-	public boolean charge(int amount){
-		if(amount>availableAmountInCreditCard)
-			return false;
-		availableAmountInCreditCard -= amount;
-		return true;
+	public synchronized boolean charge(int amount){
+			if(amount>creditCard.amount)
+				return false;
+			creditCard.amount -= amount;
+			return true;
 	}
 	
 	/**

@@ -3,6 +3,7 @@ package bgu.spl.mics.application.services;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.TimeUnit;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
 /**
@@ -26,7 +27,7 @@ public class TimeService extends MicroService{
 		super("Time Service");
 		globalTick = new AtomicInteger(1);
 		sleepLength = length;
-		terminationTick = lifetime+1;
+		terminationTick = lifetime;
 	}
 
 	@Override
@@ -34,7 +35,7 @@ public class TimeService extends MicroService{
 		System.out.println("TimeService was created, starting to count");
 		TimeUnit unit = TimeUnit.MILLISECONDS;
 		while(globalTick.getAcquire() != terminationTick) {
-			sendBroadcast(new TickBroadcast(globalTick.getAcquire()));
+			sendBroadcast(new TickBroadcast(globalTick.getAcquire(), false));
 			System.out.println("tick");
 			try {
 				unit.sleep(sleepLength);
@@ -45,6 +46,7 @@ public class TimeService extends MicroService{
 			globalTick.incrementAndGet();
 			
 		}
+		sendBroadcast(new TerminateBroadcast());
 		System.out.println("Arrived termination");
 		terminate();
 	}

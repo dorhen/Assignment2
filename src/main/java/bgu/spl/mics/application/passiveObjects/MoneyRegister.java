@@ -13,9 +13,9 @@ import java.util.LinkedList;
  * <p>
  * You can add ONLY private fields and methods to this class as you see fit.
  */
-public class MoneyRegister {
+public class MoneyRegister implements Serializable {
 	
-	private static MoneyRegister instance;
+	private static MoneyRegister instance= new MoneyRegister();
 	private List<OrderReceipt> registery;
 	
 	private MoneyRegister() {
@@ -25,8 +25,6 @@ public class MoneyRegister {
      * Retrieves the single instance of this class.
      */
 	public static MoneyRegister getInstance() {
-		if(instance == null)
-			instance = new MoneyRegister();
 		return instance;
 	}
 	

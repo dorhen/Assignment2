@@ -1,9 +1,13 @@
 package bgu.spl.mics.application.services;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.DeliveryEvent;
-import bgu.spl.mics.application.messages.carEvent;
+import bgu.spl.mics.application.messages.RealeseCarEvent;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
+import bgu.spl.mics.application.messages.CarEvent;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 
 /**
@@ -16,17 +20,23 @@ import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class LogisticsService extends MicroService {
-
-	public LogisticsService(String name) {
-		super(name);
+	private static AtomicInteger counter = new AtomicInteger(0);
+	public LogisticsService() {
+		super("LogisticService"+counter.getAndIncrement());
 	}
 
 	@Override
 	protected void initialize() {
+		System.out.println(this.getName()+" initialize");
+		subscribeBroadcast(TerminateBroadcast.class, tB -> {
+			terminate();			
+		});
 		subscribeEvent(DeliveryEvent.class, cur -> {
-			carEvent cevent = new carEvent();
+			CarEvent cevent = new CarEvent();
 			Future<DeliveryVehicle> ft = sendEvent(cevent);
-			ft.get().deliver(cur.getAddress(), cur.getDistance());
+			DeliveryVehicle result=ft.get();
+			result.deliver(cur.getAddress(), cur.getDistance());
+			sendEvent(new RealeseCarEvent(result));
 		});
 		
 	}

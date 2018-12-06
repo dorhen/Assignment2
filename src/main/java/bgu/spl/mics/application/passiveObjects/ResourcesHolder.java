@@ -38,7 +38,7 @@ public class ResourcesHolder {
      * @return 	{@link Future<DeliveryVehicle>} object which will resolve to a 
      * 			{@link DeliveryVehicle} when completed.   
      */
-	public Future<DeliveryVehicle> acquireVehicle() {// probably not right. not sure how future will be resolved
+	public Future<DeliveryVehicle> acquireVehicle() {
 		Future<DeliveryVehicle> ans = new Future<>();
 		synchronized(toBeResolved){
 			toBeResolved.add(ans);
@@ -96,7 +96,6 @@ public class ResourcesHolder {
 	                    if(ready[i]){
 	                        toBeResolved.remove().resolve(vehicles[i]);
 	                        ready[i]=false;
-	                        notifyAll();
 	                        return;
 	                    }
                 	}

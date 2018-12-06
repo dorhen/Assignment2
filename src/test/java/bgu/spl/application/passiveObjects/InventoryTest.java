@@ -1,10 +1,14 @@
-package bgu.spl.mics.application.passiveObjects;
+package bgu.spl.application.passiveObjects;
 
 import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import bgu.spl.mics.application.passiveObjects.BookInventoryInfo;
+import bgu.spl.mics.application.passiveObjects.Inventory;
+import bgu.spl.mics.application.passiveObjects.OrderResult;
 
 public class InventoryTest {
 	

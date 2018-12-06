@@ -12,14 +12,12 @@ public class DeliveryVehicle {
 	
 	private int license;
 	private int speed;
-	private boolean ready;
 	/**
      * Constructor.   
      */
 	 public DeliveryVehicle(int license, int speed) {
 		this.license = license;
 		this.speed = speed;
-		ready = true;
 	  }
 	/**
      * Retrieves the license of this delivery vehicle.   
@@ -44,13 +42,9 @@ public class DeliveryVehicle {
      * @param address	The address of the customer.
      * @param distance	The distance from the store to the customer.
      */
-	public void deliver(String address, int distance) {
-		long time = (long)distance/(long)speed;
+	public synchronized void deliver(String address, int distance) {
+		long time = distance/speed;
 		TimeUnit unit = TimeUnit.MILLISECONDS;
-		while(!ready) {
-			try{ wait();}
-			catch(InterruptedException e) {}
-		}
 		try{
 			unit.sleep(time);
 		}
