@@ -43,7 +43,7 @@ public class DeliveryVehicle {
      * @param distance	The distance from the store to the customer.
      */
 	public synchronized void deliver(String address, int distance) {
-		long time = distance/speed;
+		long time = distance*speed;
 		TimeUnit unit = TimeUnit.MILLISECONDS;
 		try{
 			unit.sleep(time);
