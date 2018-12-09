@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.io.*;
 import java.util.LinkedList;
 
@@ -17,6 +18,7 @@ public class MoneyRegister implements Serializable {
 	
 	private static MoneyRegister instance= new MoneyRegister();
 	private List<OrderReceipt> registery;
+	private AtomicInteger earnings = new AtomicInteger(0);
 	
 	private MoneyRegister() {
 		registery = new LinkedList<>();
@@ -35,16 +37,14 @@ public class MoneyRegister implements Serializable {
      */
 	public void file (OrderReceipt r) {
 		registery.add(r);
+		earnings.getAndAdd(r.getPrice());
 	}
 	
 	/**
      * Retrieves the current total earnings of the store.  
      */
 	public int getTotalEarnings() {
-		int totalEarnings = 0;
-		for(OrderReceipt r: registery)
-			totalEarnings += r.getPrice();
-		return totalEarnings;
+		return earnings.get();
 	}
 	
 	/**
@@ -63,7 +63,7 @@ public class MoneyRegister implements Serializable {
      */
 	public void printOrderReceipts(String filename) {
 		try {
-			FileOutputStream fileOut = new FileOutputStream(filename+".ser");
+			FileOutputStream fileOut = new FileOutputStream(filename);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(registery);
 			out.close();

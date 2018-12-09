@@ -36,7 +36,7 @@ public class Inventory {
      * @param inventory 	Data structure containing all data necessary for initialization
      * 						of the inventory.
      */
-	public void load (BookInventoryInfo[ ] inventory ) {
+	public void load (BookInventoryInfo[] inventory ) {
 		for(BookInventoryInfo book: inventory)
 			inv.add(book);
 	}
@@ -70,7 +70,7 @@ public class Inventory {
      */
 	public int checkAvailabiltyAndGetPrice(String book) {
 		for(BookInventoryInfo bookInfo : this.inv) {
-			if(bookInfo.getBookTitle().equals(book))return bookInfo.getAmountInInventory();
+			if(bookInfo.getBookTitle().equals(book))return bookInfo.getPrice();
 		}
 		return -1;
 	}
@@ -90,7 +90,7 @@ public class Inventory {
 		}
 	    try
 	    {
-	    	FileOutputStream fos = new FileOutputStream(filename+".ser");
+	    	FileOutputStream fos = new FileOutputStream(filename);
 	    	ObjectOutputStream oos = new ObjectOutputStream(fos);
 	    	oos.writeObject(hashmap);
 	    	oos.close();

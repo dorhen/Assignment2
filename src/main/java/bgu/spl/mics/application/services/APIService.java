@@ -51,7 +51,6 @@ public class APIService extends MicroService{
 			terminate();			
 		});
 		subscribeBroadcast(TickBroadcast.class,current -> {
-			if(current.getTermination()) terminate();
 			int tick = current.getCurrentTime();
 			System.out.println(getName() + " got a message from the tick broadcast, current time: "+ tick);
 			if(tickMap.get(tick) != null)

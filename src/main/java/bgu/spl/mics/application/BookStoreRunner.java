@@ -6,8 +6,13 @@ import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.services.*;
 
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
@@ -18,11 +23,12 @@ import com.google.gson.stream.JsonReader;
  */
 public class BookStoreRunner {
     public static void main(String[] args) {
-    	/*if(args.length!=5) {
+    	if(args.length!=5) {
     		throw new IllegalArgumentException("");
-    	}*/
+    	}
     	Gson gson = new Gson();
     	try {
+    		HashMap<Integer,Customer> customers= new HashMap<>();
 			JsonReader reader = new JsonReader(new FileReader(args[0]));
 			InputContainer input = gson.fromJson(reader, InputContainer.class);
 			Inventory inventory = Inventory.getInstance();
@@ -54,6 +60,7 @@ public class BookStoreRunner {
 				index++;	
 			}
 			for(Customer c: input.services.customers) {
+				customers.put(c.getId(), c);
 				threads[index]=new Thread(new APIService(c.orderSchedule,c));
 				threads[index].start();
 				index++;
@@ -63,10 +70,37 @@ public class BookStoreRunner {
 			index++;
 			for(i=0;i<numOfThreads;i++)
 				threads[i].join();
-			MoneyRegister.getInstance().printOrderReceipts(args[3]);;
-			
-    	} catch (FileNotFoundException | InterruptedException e) {
-			System.out.println("input not valid or Interrupted thread");
-		} 	
+			print(customers,args[1]);
+			Inventory.getInstance().printInventoryToFile(args[2]);
+			MoneyRegister m= MoneyRegister.getInstance();
+			m.printOrderReceipts(args[3]);
+			print(m,args[4]);
+    	} catch (InterruptedException | IOException e) {
+			System.out.println("Exception!!!! Dor is the main problem of that");
+		}
+    	System.out.println(((MoneyRegister) read(args[4])).getTotalEarnings());
+    }
+    
+    private static void print(Object h,String filename) {
+    	try{
+               FileOutputStream fos =new FileOutputStream(filename);
+               ObjectOutputStream oos = new ObjectOutputStream(fos);
+               oos.writeObject(h);
+               oos.close();
+               fos.close();
+        }
+    	catch(IOException ioe){
+               ioe.printStackTrace();
+        }
+    }
+    
+    private static Object read(String filename) {
+    	  try{ObjectInputStream in=new ObjectInputStream(new FileInputStream(filename));  
+    	  Object s=in.readObject();  
+    	  in.close(); 
+    	  return s;}
+    	  catch(Exception io) {}
+		return null;
+    	
     }
 }

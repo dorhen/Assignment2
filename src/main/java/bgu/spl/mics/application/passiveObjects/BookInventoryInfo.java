@@ -9,13 +9,13 @@ package bgu.spl.mics.application.passiveObjects;
 public class BookInventoryInfo {
 	
 	private String bookTitle;
-	private int amountInInventory; //AtomicInteger?
-	private int Price;
+	private int amount; //AtomicInteger?
+	private int price;
 	
 	public BookInventoryInfo(String name, int amount, int price) {
 		bookTitle = name;
-		amountInInventory = amount;
-		Price = price;
+		this.amount = amount;
+		this.price = price;
 	}
 
 	/**
@@ -33,7 +33,7 @@ public class BookInventoryInfo {
      * @return amount of available books.      
      */
 	public int getAmountInInventory() {
-		return amountInInventory;
+		return amount;
 	}
 
 	/**
@@ -42,11 +42,11 @@ public class BookInventoryInfo {
      * @return the price of the book.
      */
 	public int getPrice() {
-		return Price;
+		return price;
 	}
 	
 	public void reduceAmount() {
-		amountInInventory--;
+		amount--;
 	}
 	
 	

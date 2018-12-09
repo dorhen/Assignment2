@@ -1,6 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
 
-public class orderSchedule {
+import java.io.Serializable;
+
+public class orderSchedule implements Serializable{
 	
 	
 	private String bookTitle;

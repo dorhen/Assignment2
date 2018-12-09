@@ -51,24 +51,24 @@ public class SellingService extends MicroService{
 		subscribeEvent(BookOrderEvent.class, current ->{
 			int balance = current.getCustomer().getAvailableCreditAmount();
 			String title = current.getBookTitle();
-				Future<Integer> ft = (Future<Integer>) sendEvent(new CheckAvailabilityEvent(title));
-				int price = ft.get();
-				Future<OrderResultTicked> ft2 = null;
-				Customer c = current.getCustomer();
-				synchronized(c) {
-					if(price > -1 && balance >= price) {
-					ft2 = (Future<OrderResultTicked>) sendEvent(new TakeBookEvent(title));
-					OrderResultTicked result = ft2.get();
-					if(result.getResult() == OrderResult.SUCCESSFULLY_TAKEN)
-						current.getCustomer().charge(price);
-						sendEvent(new DeliveryEvent(title, c.getDistance()));
-						OrderReceipt receipt = new OrderReceipt(0, getName(), c.getId(), title, price, current.getOrderTick(), currentTick ,result.getTick());
-						moneyRegRef.file(receipt);
-						complete(current, receipt);
-					}
-					else
-						complete(current,null);
+			Future<Integer> ft = (Future<Integer>) sendEvent(new CheckAvailabilityEvent(title));
+			int price = ft.get();
+			Future<OrderResultTicked> ft2 = null;
+			Customer c = current.getCustomer();
+			synchronized(c) {
+				if(price > -1 && balance >= price) {
+				ft2 = (Future<OrderResultTicked>) sendEvent(new TakeBookEvent(title));
+				OrderResultTicked result = ft2.get();
+				if(result.getResult() == OrderResult.SUCCESSFULLY_TAKEN)
+					current.getCustomer().charge(price);
+					sendEvent(new DeliveryEvent(title, c.getDistance()));
+					OrderReceipt receipt = new OrderReceipt(0, getName(), c.getId(), title, price, current.getOrderTick(), currentTick ,result.getTick());
+					moneyRegRef.file(receipt);
+					complete(current, receipt);
 				}
+				else
+					complete(current,null);
+			}
 				
 				
 				
