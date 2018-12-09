@@ -18,13 +18,13 @@ import java.util.Queue;
 public class MessageBusImpl implements MessageBus {
 	
 	private static MessageBusImpl instance = null;
-	private Vector<Object[]> microServicesQueue;
-	private Map<Class<? extends Event<?>>, Queue<MicroService>> roundRobinMap;
+	private Map<MicroService,Queue<Message>> microServiceQueue;
+	private Map<Class<? extends Message>, Queue<MicroService>> roundRobinMap;
 	private Map<Event<?>,Future<?>> futureMap;
 	
 	private MessageBusImpl() {
-		microServicesQueue = new Vector<Object[]>();
-		roundRobinMap = new HashMap<Class<? extends Event<?>>, Queue<MicroService>>();
+		microServiceQueue = new HashMap<MicroService,Queue<Message>>();
+		roundRobinMap = new HashMap<Class<? extends Message>, Queue<MicroService>>();
 		futureMap = new HashMap<Event<?>,Future<?>>();
 	}
 	
@@ -36,108 +36,77 @@ public class MessageBusImpl implements MessageBus {
 	
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		synchronized(microServicesQueue) {
-			for(Object[] arr: microServicesQueue) {
-				if(arr[1] == m && !((Vector<Class<? extends Event<?>>>)arr[2]).contains(type)) {
-					((Vector<Class<? extends Event<T>>>)arr[2]).add(type);
-					if(roundRobinMap.get(type) == null)
-						roundRobinMap.put(type, new LinkedList<>());
-					roundRobinMap.get(type).add(m);
-				}
-			}
+		synchronized(microServiceQueue) {
+			if(roundRobinMap.get(type) == null)
+				roundRobinMap.put(type, new LinkedList<MicroService>());
+			roundRobinMap.get(type).add(m);
 		}
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		synchronized(microServicesQueue) {
-			for(Object[] arr: microServicesQueue) {
-				if(arr[1] == m)
-					((Vector<Class<? extends Broadcast>>)arr[3]).add(type);
-			}
+		synchronized(microServiceQueue) {
+			if(roundRobinMap.get(type) == null)
+				roundRobinMap.put(type, new LinkedList<MicroService>());
+			roundRobinMap.get(type).add(m);
 		}
 	}
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
 		Future<T> ft = (Future<T>) futureMap.get(e);
-		
 		ft.resolve(result);
 	}
 
 	@Override
 	public synchronized void sendBroadcast(Broadcast b) {
 		boolean wakeUp = false;
-		for(Object[] arr: microServicesQueue) {
-			if(((Vector<Class<? extends Broadcast>>)arr[3]).contains(b.getClass())) {
-				((Queue<Message>)arr[0]).add(b);
-				wakeUp = true;
-			}
+		Queue<MicroService> q = roundRobinMap.get(b.getClass());
+		if(q != null){
+			for(MicroService m : q)
+				microServiceQueue.get(m).add(b);
+			notifyAll();
 		}
-		if(wakeUp) notifyAll();
 	}
 
 	
 	@Override
-	public synchronized <T> Future<T> sendEvent(Event<T> e) {
+	public <T> Future<T> sendEvent(Event<T> e) {
 		Future<T> ft = new Future<T>();
 		futureMap.put(e, ft);
-		Queue<MicroService> msQ = roundRobinMap.get(e.getClass());;
-		if(msQ == null) return null;
-		MicroService m = msQ.remove();
-		if (m == null) return null;
-		for(Object[] arr: microServicesQueue) {
-			if(arr[1] == m) {
-				Queue<Message> q = (Queue<Message>)arr[0];
-				q.add(e);
-				notifyAll();
-			}
+		Queue<MicroService> msQ = roundRobinMap.get(e.getClass());
+		synchronized(msQ){
+			if(msQ == null) return null;
+			MicroService m = msQ.remove();
+			if (m == null) return null;
+			microServiceQueue.get(m).add(e);
+			msQ.add(m);
 		}
-		msQ.add(m);
 		return ft;
 	}
 
 	@Override
 	public void register(MicroService m) {
-		Queue<Message> q = new LinkedList<>();
-		Object[] arr = new Object[4];//arr[0] holds the queue, arr[1] holds the micro-service, arr[2] holds the event type, arr[3] holds the broadcast type.
-		arr[0] = q;
-		arr[1] = m;
-		arr[2] = new Vector<Class<? extends Event>>();
-		arr[3] = new Vector<Class<? extends Broadcast>>();
-		microServicesQueue.add(arr);
+		Queue<Message> q = new LinkedList<Message>();
+		microServicesQueue.put(m,q);
 	}
 
 	@Override
 	public void unregister(MicroService m) {
-		synchronized(microServicesQueue) {
-			for(Object[] arr: microServicesQueue) {
-				if(arr[1] == m) {
-					for(Message e : ((Queue<Message>)arr[0]))
-							complete((Event<?>) e,null);
-					microServicesQueue.remove(arr);
-					for(Class<? extends Event<?>> type : ((Vector<Class<? extends Event<?>>>)arr[2])) {
-						Queue<MicroService> msQ = roundRobinMap.get(type);;
-						if(msQ != null) msQ.remove(m);
-					}
-					return;
-				}
-			}
+		Queue<Message> q = microServiceQueue.get(m);
+		for(Message e : q)
+			if(e instanceof Event<?>) complete((Event<?>)e,null);
+		for(Map.Entry<Class<? extends Message>, Queue<MicroService>> pair : roundRobinMap.entrySet()){
+			pair.getValue().remove(m);
 		}
 	}
 
 	@Override
 	public synchronized Message awaitMessage(MicroService m) throws InterruptedException {
-		for(Object[] arr: microServicesQueue) {
-			if(arr[1] == m) {
-				Queue<Message> q = (Queue<Message>)arr[0];
-				while(q.isEmpty())
-					wait();
-				Message msg = q.remove();
-				return msg;
-			}
-		}
-		throw new IllegalStateException("Micro-Service was never registered");
+		Queue<Message> q = microServiceQueue.get(m);
+		if(q == null) throw new IllegalStateException("Micro-Service was never registered");
+		if(q.isEmpty()) wait();
+		return q.remove();
 	}
 
 	
