@@ -36,7 +36,7 @@ public class MessageBusImpl implements MessageBus {
 	
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		synchronized(microServiceQueue) {
+		synchronized(type) {
 			if(roundRobinMap.get(type) == null)
 				roundRobinMap.put(type, new LinkedList<MicroService>());
 			roundRobinMap.get(type).add(m);
@@ -45,7 +45,7 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		synchronized(microServiceQueue) {
+		synchronized(type) {
 			if(roundRobinMap.get(type) == null)
 				roundRobinMap.put(type, new LinkedList<MicroService>());
 			roundRobinMap.get(type).add(m);
@@ -75,11 +75,12 @@ public class MessageBusImpl implements MessageBus {
 		Future<T> ft = new Future<T>();
 		futureMap.put(e, ft);
 		Queue<MicroService> msQ = roundRobinMap.get(e.getClass());
+		if(msQ == null) return null;
 		synchronized(msQ){
-			if(msQ == null) return null;
-			MicroService m = msQ.remove();
+			MicroService m = msQ.poll();
 			if (m == null) return null;
 			microServiceQueue.get(m).add(e);
+			synchronized(this) { notifyAll();}
 			msQ.add(m);
 		}
 		return ft;
@@ -88,7 +89,7 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void register(MicroService m) {
 		Queue<Message> q = new LinkedList<Message>();
-		microServicesQueue.put(m,q);
+		microServiceQueue.put(m,q);
 	}
 
 	@Override
@@ -103,10 +104,10 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public synchronized Message awaitMessage(MicroService m) throws InterruptedException {
-		Queue<Message> q = microServiceQueue.get(m);
-		if(q == null) throw new IllegalStateException("Micro-Service was never registered");
-		if(q.isEmpty()) wait();
-		return q.remove();
+			Queue<Message> q = microServiceQueue.get(m);
+			if(q == null) throw new IllegalStateException("Micro-Service was never registered");
+			while(q.isEmpty()) wait();
+			return q.remove();
 	}
 
 	
